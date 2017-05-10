@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import * as ScoreFunction from './ScoreFunctions';
-import { addPlayerScore } from '../reducers/index';
+import { addPlayerScore, changeTurn, resetRollNum, fireBool } from '../reducers/index';
 
 class PlayerScoreboard extends Component {
     constructor(props) {
         super(props);
+
         this.combinePlayerDice = this.combinePlayerDice.bind(this);
         this.addOneThroughSix = ScoreFunction.addOneThroughSix.bind(this);
         this.deButton = ScoreFunction.deButton.bind(this);
@@ -18,6 +19,7 @@ class PlayerScoreboard extends Component {
         this.scoreChance = ScoreFunction.scoreChance.bind(this);
         this.scoreSmStr = ScoreFunction.scoreSmStr.bind(this);
         this.scoreLgStr = ScoreFunction.scoreLgStr.bind(this);
+        this.addScoreChangeTurn = this.addScoreChangeTurn.bind(this);
     }
 
     combinePlayerDice() {
@@ -25,63 +27,62 @@ class PlayerScoreboard extends Component {
         return all;
     }
 
+    addScoreChangeTurn(scoreArr) {
+        console.log('scoreArr in addscorechangeturn: ', scoreArr)
+        if (scoreArr === null) return;
+        console.log('ScoreARR!!!! ', scoreArr)
+        this.props.addPlayerScore(scoreArr);
+        this.props.changeTurn('computer');
+        this.props.resetRollNum();
+        const rollButton = document.getElementById('roll-dice-button');
+        rollButton.style.visibility = 'hidden';
+        this.props.fireBool();
+    }
+
     render() {
         return (
             <div>
                 <div className="top-score scoreboard-buttons">
                     <div id="One" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(1, 'One', this.combinePlayerDice)
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(1, 'One', this.combinePlayerDice));
                         }}>One</div>
                     <div id="Two" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(2, 'Two', this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(2, 'Two', this.combinePlayerDice));
                         }}>Two</div>
                     <div id="Three" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(3, 'Three', this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(3, 'Three', this.combinePlayerDice));
                         }}>Three</div>
                     <div id="Four" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(4, 'Four', this.combinePlayerDice)
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(4, 'Four', this.combinePlayerDice));
                         }}>Four</div>
                     <div id="Five" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(5, 'Five', this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(5, 'Five', this.combinePlayerDice));
                         }}>Five</div>
                     <div id="Six" className="scores" onClick={() => {
-                        const scoreArr = this.addOneThroughSix(6, 'Six', this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.addOneThroughSix(6, 'Six', this.combinePlayerDice));
                         }}>Six</div>
                 </div>
                 <div className="bottom-score scoreboard-buttons">
                     <div className="scores"id="Three-of-a-Kind" onClick={() => {
-                        const scoreArr = this.score3or4k('Three-of-a-Kind', 3, this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.score3or4k('Three-of-a-Kind', 3, this.combinePlayerDice));
                         }}>Three of a Kind</div>
                     <div className="scores"id="Four-of-a-Kind" onClick={() => {
-                        const scoreArr = this.score3or4k('Four-of-a-Kind', 4, this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.score3or4k('Four-of-a-Kind', 4, this.combinePlayerDice));
                         }}>Four of a Kind</div>
                     <div className="scores"id="Full-House" onClick={() => {
-                        const scoreArr = this.scoreFullHouse(this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.scoreFullHouse(this.combinePlayerDice));
                         }}>Full House</div>
                     <div className="scores"id="Small-Straight" onClick={() => {
-                        const scoreArr = this.scoreSmStr(this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.scoreSmStr(this.combinePlayerDice));
                         }}>Small Straight</div>
                     <div className="scores"id="Large-Straight" onClick={() => {
-                        const scoreArr = this.scoreLgStr(this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.scoreLgStr(this.combinePlayerDice));
                         }}>Large Straight</div>
                     <div className="scores"id="Yahtzee" onClick={() => {
-                        const scoreArr = this.scoreYahtzee(this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.scoreYahtzee(this.combinePlayerDice));
                         }}>Yahtzee</div>
                     <div className="scores"id="Chance" onClick={() => {
-                        const scoreArr = this.scoreChance(this.combinePlayerDice);
-                        this.props.addPlayerScore(scoreArr);
+                        this.addScoreChangeTurn(this.scoreChance(this.combinePlayerDice));
                         }}>Chance</div>
                 </div>
             </div>
@@ -98,17 +99,23 @@ export default connect(
         playerKeepArr: state.playerKeepArr,
         diceRollArr: state.diceRollArr,
         playerScores: state.playerScores,
-        computerScores: state.computerScores
+        turn: state.turn
     };
   }, 
   (dispatch) => {
       return {
           addPlayerScore: function(scoreArr) {
               dispatch(addPlayerScore(scoreArr));
+          },
+          changeTurn: function(turn) {
+              dispatch(changeTurn(turn));
+          },
+          resetRollNum: function() {
+              dispatch(resetRollNum());
+          },
+          fireBool: function() {
+              dispatch(fireBool());
           }
-        //   updateDiceRoll: function(s) {
-        //       dispatch(updateDiceRoll(diceRollArr));
-        //   }
       };
   }
 )(PlayerScoreboard)

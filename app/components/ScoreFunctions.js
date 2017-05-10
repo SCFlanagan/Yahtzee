@@ -1,9 +1,13 @@
 export const deButton = (id, score)=> {
     const elem = document.getElementById(id);
+    if (elem.value) {
+        return false;
+    }
     id = id.split('-').join(' ');
     elem.innerHTML = id + ': ' + score;
     elem.className = 'score-final';
-    return;
+    elem.value = 'filled';
+    return true;
 }
 
 export const addOneThroughSix = (num, id, findAll) => {
@@ -14,8 +18,10 @@ export const addOneThroughSix = (num, id, findAll) => {
             score += dice[i];
         }
     }
-    deButton(id, score);
-    return [id, score];
+    const success = deButton(id, score);
+    console.log('success: ', success)
+    if (success) return [id, score]
+    else return null;
 }
 
 export const sumArray = (arr) => {
@@ -48,15 +54,15 @@ export const countDice = (all) => {
 }
 
 export const score3or4k = (id, num, findAll) => {
-    let score;
     const all = findAll();
+    console.log('******all: ', all)
+    const score = sumArray(all);
+    console.log('******score: ', score)
     const counted = countDice(all);
-    for (var i = 0; i < counted.length; i++) {
-        if (Number(counted[i][0] >= num)) {
-            score = sumArray(all);
-            deButton(id, score);
-            return [id, score];
-        }
+    if (Number(counted[0][0]) >= num) {
+        deButton(id, score);
+        console.log('******score: ', score)
+        return [id, score];
     }
     // Make this a modal!!
     const title = id.split('-').join(' ');
@@ -159,7 +165,7 @@ export const scoreYahtzee = (findAll) => {
     }
     // take into account if there already is a yahtzee!!
     deButton('Yahtzee', 50);
-    rreturn ['Yahtzee', 50];
+    return ['Yahtzee', 50];
 }
 
 export const scoreChance = (findAll) => {

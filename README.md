@@ -102,3 +102,26 @@ have a linter someday soon.
 Afterwards,
   - *To deploy:* `npm run deploy-heroku`
   - *To re-seed:* `heroku run npm run seed`
+
+
+
+
+Stop rolling when the computer has taken a score
+
+Fix when to go for 3k/4k, when to choose which
+
+Recognizing large straights
+
+Computer adding doubles to 1-6 (adding when there's already a score)
+
+Computer not taking a 0 for 4k
+
+can't get last computer score
+
+Add modals telling you what the computer chose
+
+Add instructions modals at very beginning
+
+Add up the scores at the end and have a winner's screen
+
+

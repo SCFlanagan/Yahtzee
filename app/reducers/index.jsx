@@ -2,7 +2,11 @@ import { combineReducers } from 'redux'
 
 const initialState = {
   playerKeepArr: [],
+  computerKeepArr: [],
   diceRollArr: [],
+  turn: 'player',
+  rollNum: 1,
+  fire: false,
   playerScores: { 
     length: 0,
     One: null,
@@ -19,7 +23,22 @@ const initialState = {
     'Yahtzee': null,
     'Chance': null
    },
-  computerScores: { length: 0 }
+  computerScores: { 
+    length: 0,
+    One: null,
+    Two: null,
+    Three: null,
+    Four: null,
+    Five: null,
+    Six: null,
+    'Three-of-a-Kind': null,
+    'Four-of-a-Kind': null,
+    'Full-House': null,
+    'Small-Straight': null,
+    'Large-Straight': null,
+    'Yahtzee': null,
+    'Chance': null
+   }
 }
 
 
@@ -30,6 +49,10 @@ const rootReducer = (state = initialState, action) => {
 
     case 'UPDATE_PLAYER_KEEP':
       newState.playerKeepArr = action.playerKeepArr
+      break;
+
+    case 'UPDATE_COMPUTER_KEEP':
+      newState.computerKeepArr = action.computerKeepArr
       break;
 
     case 'UPDATE_DICE_ROLL':
@@ -50,10 +73,25 @@ const rootReducer = (state = initialState, action) => {
       }
       break;
 
+    case 'CHANGE_TURN':
+      newState.turn = action.turn;
+      break;
+
+    case 'RESET_ROLL_NUM':
+      newState.rollNum = 1;
+      break;
+
+    case 'UPDATE_ROLL_NUM':
+      newState.rollNum++;
+      break;
+
+    case 'FIRE_BOOL': 
+      newState.fire = !newState.fire;
+      break;
+
     default: return state;
 
   }
-  console.log(newState.playerScores);
   return newState
 }
 
@@ -63,6 +101,13 @@ export const updatePlayerKeep = (playerKeepArr) => {
   return {
     type: 'UPDATE_PLAYER_KEEP',
     playerKeepArr
+  }
+}
+
+export const updateComputerKeep = (computerKeepArr) => {
+  return {
+    type: 'UPDATE_COMPUTER_KEEP',
+    computerKeepArr
   }
 }
 
@@ -89,6 +134,31 @@ export const addComputerScore = (scoreArr) => {
     }
 }
 
+export const changeTurn = (turn) => {
+  return {
+    type: 'CHANGE_TURN',
+    turn
+  }
+}
+
+export const resetRollNum = () => {
+  return {
+    type: 'RESET_ROLL_NUM',
+    rollNum: 1
+  }
+}
+
+export const updateRollNum = () => {
+  return {
+    type: 'UPDATE_ROLL_NUM'
+  }
+}
+
+export const fireBool = () => {
+  return {
+    type: 'FIRE_BOOL'
+  }
+}
 
 
 export default rootReducer

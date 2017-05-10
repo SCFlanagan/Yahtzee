@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import { Button } from 'react-bootstrap';
 import PlayerScoreboard from './PlayerScoreboard';
 import ComputerScoreboard from './ComputerScoreboard';
-import { updatePlayerKeep, updateDiceRoll } from '../reducers/index';
+import { updatePlayerKeep, updateDiceRoll, updateComputerKeep, updateRollNum, fireBool, changeTurn, resetRollNum } from '../reducers/index';
+import * as Strategy from './ComputerStrategyFunctions';
 
 class Game extends Component {
     constructor(props) {
@@ -12,7 +13,10 @@ class Game extends Component {
             playerKeepArr: [],
             diceRollArr: [],
             computerKeepArr: [],
-            rollNum: 1,
+            bool: true,
+            computerTopScore: 0,
+            computerBottomScore: 0,
+            compTypes: [],
             dicePicObj: {
                 0: 'http://colornames.facts.co/darkredcolorcode/darkredcolor.png', 
                 1: 'http://www.clipartkid.com/images/160/dice-1-clip-art-at-clker-com-vector-clip-art-online-royalty-free-GIXbjz-clipart.png', 
@@ -25,10 +29,52 @@ class Game extends Component {
         }
         this.rollDice = this.rollDice.bind(this);
         this.resetDice = this.resetDice.bind(this);
-        this.playerKeepDice = this.playerKeepDice.bind(this);
-        this.playerRemoveDice = this.playerRemoveDice.bind(this);
+        this.keepDice = this.keepDice.bind(this);
+        this.removeDice = this.removeDice.bind(this);
         this.removeValueFromArr = this.removeValueFromArr.bind(this);
         this.putDiceWhereValueIsZero = this.putDiceWhereValueIsZero.bind(this);
+        this.computerMovesOneTwo = this.computerMovesOneTwo.bind(this);
+        this.resetTurn = this.resetTurn.bind(this);
+        this.combineComputerDice = this.combineComputerDice.bind(this);
+        this.computerMoveDice = this.computerMoveDice.bind(this);
+        this.computerMoveThree = this.computerMoveThree.bind(this);
+        this.consoleLogValues = this.consoleLogValues.bind(this);
+    }
+
+    componentDidUpdate() {
+        if (this.state.compTypes.length === 13) {
+            console.log('bottom: ', this.state.computerBottomScore)
+            console.log('top: ', this.state.computerTopScore)
+            let total = 0;
+            if (this.state.computerTopScore >= 63) total += 35;
+            total += this.state.computerBottomScore + this.state.computerTopScore;
+            console.log('total: ', total);
+            return;
+        }
+        if (this.props.fire === true) {
+           this.props.fireBool();
+           this.resetTurn();
+           setTimeout(this.rollDice, 2000);
+           setTimeout(() => {
+               console.log(this.state.bool);
+               this.state.bool = this.computerMovesOneTwo(this.state.bool)}, 3000);
+           setTimeout(this.rollDice, 4000);
+           setTimeout(() => {
+               console.log(this.state.bool);
+               this.state.bool = this.computerMovesOneTwo(this.state.bool)}, 5000);
+           setTimeout(this.rollDice, 6000);
+           setTimeout(() => {
+               console.log(this.state.bool)
+               this.computerMoveThree(this.state.bool)}, 7000);
+           setTimeout(this.resetTurn, 8000)
+           setTimeout(() => {
+                this.props.changeTurn('player');
+           }, 10000)
+           setTimeout(() => {
+                const rollButton = document.getElementById('roll-dice-button');
+                rollButton.style.visibility = 'visible';
+           }, 11000);
+       }
     }
 
     rollDice() {
@@ -36,10 +82,10 @@ class Game extends Component {
         let elem;
         let num;
         this.resetDice();
-        if (this.state.rollNum === 1) {
+        if (this.props.rollNum === 1) {
             num = 5;
         } else {
-            num = this.state.diceRollArr.length;
+            num = this.props.diceRollArr.length;
         }
         this.state.diceRollArr = [];
         for (var i = 0; i < num; i++) {
@@ -50,18 +96,13 @@ class Game extends Component {
             this.state.diceRollArr.push(value);
         }
         this.props.updateDiceRoll(this.state.diceRollArr);
-        if (this.state.rollNum === 3) {
+        if (this.props.rollNum === 3) {
             const rollButton = document.getElementById('roll-dice-button');
-            rollButton.style.visibility = 'hidden';
-            rollButton.onClick = () => {
-                return;
+            if (this.props.turn === 'player') {
+                rollButton.style.visibility = 'hidden';
             }
         }
-        this.state.rollNum++;
-    }
-
-    rollOneDie() {
-        return Math.ceil(Math.random() * 6)
+        this.props.updateRollNum();
     }
 
     resetDice() {
@@ -72,32 +113,78 @@ class Game extends Component {
         }
     }
 
-    playerKeepDice(id) {
-        // Move dice to player's dice area
+    rollOneDie() {
+        return Math.ceil(Math.random() * 6)
+    }
+
+    resetTurn() {
+        this.state.playerKeepArr = [];
+        this.state.computerKeepArr = [];
+        this.state.diceRollArr = [];
+        this.props.updateComputerKeep(this.state.computerKeepArr);
+        this.props.updatePlayerKeep(this.state.playerKeepArr);
+        this.props.updateDiceRoll(this.state.diceRollArr);
+        this.props.resetRollNum()
+        let elem;
+        for (var i = 0; i < 10; i++) {
+            elem = document.getElementById(i.toString());
+            elem.src = this.state.dicePicObj[0];
+            elem.value = 0;
+        }
+        this.state.bool = true;
+        // Make player score buttons unclickable
+    }
+
+    consoleLogValues() {
+        let elem;
+        for (let i = 0; i < 10; i++) {
+            elem = document.getElementById(i.toString());
+            console.log({i: elem.value});
+        }
+        console.log('playerKeep: ', this.props.playerKeepArr)
+        console.log('diceRoll: ', this.props.diceRollArr);
+        console.log('computerKeep: ', this.props.computerKeep);
+        console.log('num roll: ', this.props.numRoll);
+    }
+
+    keepDice(id, player) {
+        // Move dice to keep area
         const elem = document.getElementById(id);
         const value = elem.value;
         this.putDiceWhereValueIsZero(5, 9, value);
-        this.state.playerKeepArr.push(value);
-        this.props.updatePlayerKeep(this.state.playerKeepArr);
+        if (player === 'player') {
+            this.state.playerKeepArr.push(value);
+            this.props.updatePlayerKeep(this.state.playerKeepArr);
+        } else {
+            this.state.computerKeepArr.push(value);
+            this.props.updateComputerKeep(this.state.computerKeepArr);
+        }
         // Remove dice from center area
         elem.src = this.state.dicePicObj[0];
         elem.value = 0;
         this.state.diceRollArr = this.removeValueFromArr(this.state.diceRollArr, value);
         this.props.updateDiceRoll(this.state.diceRollArr);
+        this.consoleLogValues();
     }
 
-    playerRemoveDice(id) {
+    removeDice(id, player) {
         // Move dice back to center
         const elem = document.getElementById(id);
         const value = elem.value;
         this.putDiceWhereValueIsZero(0, 4, value);
         this.state.diceRollArr.push(value);
         this.props.updateDiceRoll(this.state.diceRollArr);
-        // Remove dice from player's dice area
+        // Remove dice from keep area
         elem.src = this.state.dicePicObj[0];
         elem.value = 0;
-        this.state.playerKeepArr = this.removeValueFromArr(this.state.playerKeepArr, value);
-        this.props.updatePlayerKeep(this.state.playerKeepArr);
+        if (player === 'player') {
+            this.state.playerKeepArr = this.removeValueFromArr(this.state.playerKeepArr, value);
+            this.props.updatePlayerKeep(this.state.playerKeepArr);
+        } else {
+            this.state.computerKeepArr = this.removeValueFromArr(this.state.computerKeepArr, value);
+            this.props.updateComputerKeep(this.state.computerKeepArr);
+        }
+        this.consoleLogValues();
     }
 
 
@@ -105,9 +192,11 @@ class Game extends Component {
         let elem;
         for (var i = startId; i <= endId; i++) {
             elem = document.getElementById(i.toString());
+            console.log('elem.value: ', elem.value);
             if (elem.value === 0 || elem.value === undefined) {
-                elem.value = newValue;
+                console.log('newValue: ', newValue)
                 elem.src = this.state.dicePicObj[newValue];
+                elem.value = newValue;
                 break;
             }
         }
@@ -123,6 +212,89 @@ class Game extends Component {
         return arr;
     }
 
+    combineComputerDice() {
+        const all = this.props.computerKeepArr.concat(this.props.diceRollArr);
+        return all;
+    }
+
+    computerMoveDice(diceToKeep) {
+        let elem;
+        let value;
+        for (let i = 0; i < 5; i++) {
+            elem = document.getElementById(i.toString());
+            elem.value = 0;
+            elem.src = this.state.dicePicObj[0];
+        }
+        let keepIndex = diceToKeep.length + 5;
+        for (let j = 5; j < 10; j++) {
+            elem = document.getElementById(j.toString());
+            if (j <= keepIndex) {
+                value = diceToKeep[j-5];
+                elem.value = value;
+                elem.src = this.state.dicePicObj[value];
+            } else {
+                elem.value = 0;
+                elem.src = this.state.dicePicObj[0];
+            }
+        }
+        this.props.updateComputerKeep(diceToKeep);
+        let lengthDiceRoll = 5 - diceToKeep.length;
+        let newKeepArr = [];
+        for (let k = 0; k < lengthDiceRoll; k++) {
+            newKeepArr.push(0);
+        }
+        this.props.updateDiceRoll(newKeepArr);
+    }
+
+    computerMovesOneTwo(bool) {
+        if (bool === true) {
+            const diceArr = this.combineComputerDice();
+            const analysis = Strategy.analyze(diceArr);
+            let diceToKeep = [];
+            if (analysis !== "none") {
+                const choice = Strategy.choose(diceArr);
+                this.state.computerBottomScore += choice[1];
+                this.state.compTypes.push(choice[0]);
+                const elem = document.getElementById(choice[0]);
+                elem.className = 'score-final';
+                const title = choice[0].split('-').join(' ');
+                elem.innerHTML = title.slice(1) + ': ' + choice[1];
+                return false;
+            } else {
+                diceToKeep = Strategy.find(diceArr);
+                this.computerMoveDice(diceToKeep);
+                return true;
+            }
+        } else {
+            const rollButton = document.getElementById('roll-dice-button');
+            rollButton.style.visibility = 'visible';
+            return false;
+        }
+    }
+
+    computerMoveThree(bool) {
+        if (bool === true) {
+            const diceArr = this.combineComputerDice();
+            const choice = Strategy.choose(diceArr);
+            const elem = document.getElementById(choice[0]);
+            elem.className = 'score-final';
+            console.log('choice[0]:', choice[0]);
+            if (choice[0] === 'COne' || choice[0] === 'CTwo' || choice[0] === 'CThree' || choice[0] === 'CFour' || choice[0] === 'CFive' || choice[0] === 'CSix') {
+                this.state.computerTopScore += choice[1];
+            } else {
+                this.state.computerBottomScore += choice[1]
+            }
+            this.state.compTypes.push(choice[0]);
+            const title = choice[0].split('-').join(' ');
+            elem.innerHTML = title.slice(1) + ': ' + choice[1];
+            return true;
+        } else {
+            const rollButton = document.getElementById('roll-dice-button');
+            rollButton.style.visibility = 'visible';
+            return false;
+        }
+    }
+
     render() {
         return (
             <div id="game-page">
@@ -133,21 +305,21 @@ class Game extends Component {
                 </div>
                 <div className="inner-div game-div" id="center-game">
                     <div id="rolling-dice">
-                        <img className='dice' id="0" src={this.state.dicePicObj[0]} onClick={() => {this.playerKeepDice('0')}} value='0' />
-                        <img className='dice' id="1" src={this.state.dicePicObj[0]} onClick={() => {this.playerKeepDice('1')}} value='0' />
-                        <img className='dice' id="2" src={this.state.dicePicObj[0]} onClick={() => {this.playerKeepDice('2')}} value='0' />
-                        <img className='dice' id="3" src={this.state.dicePicObj[0]} onClick={() => {this.playerKeepDice('3')}} value='0' />
-                        <img className='dice' id="4" src={this.state.dicePicObj[0]} onClick={() => {this.playerKeepDice('4')}} value='0' />
+                        <img className='dice' id="0" src={this.state.dicePicObj[0]} onClick={() => {this.keepDice('0', 'player')}} value='0' />
+                        <img className='dice' id="1" src={this.state.dicePicObj[0]} onClick={() => {this.keepDice('1', 'player')}} value='0' />
+                        <img className='dice' id="2" src={this.state.dicePicObj[0]} onClick={() => {this.keepDice('2', 'player')}} value='0' />
+                        <img className='dice' id="3" src={this.state.dicePicObj[0]} onClick={() => {this.keepDice('3', 'player')}} value='0' />
+                        <img className='dice' id="4" src={this.state.dicePicObj[0]} onClick={() => {this.keepDice('4', 'player')}} value='0' />
                     </div>
                     <div id="keeping-dice">
                         <div id="dice-top">
-                            <img className='dice' id="5" src={this.state.dicePicObj[0]} onClick={() => {this.playerRemoveDice('5')}} value='0' />
-                            <img className='dice' id="6" src={this.state.dicePicObj[0]} onClick={() => {this.playerRemoveDice('6')}} value='0' />
+                            <img className='dice' id="5" src={this.state.dicePicObj[0]} onClick={() => {this.removeDice('5', 'computer')}} value='0' />
+                            <img className='dice' id="6" src={this.state.dicePicObj[0]} onClick={() => {this.removeDice('6', 'computer')}} value='0' />
                         </div>
                         <div id="dice-bottom">
-                            <img className='dice' id="7" src={this.state.dicePicObj[0]} onClick={() => {this.playerRemoveDice('7')}} value='0' />
-                            <img className='dice' id="8" src={this.state.dicePicObj[0]} onClick={() => {this.playerRemoveDice('8')}} value='0' />
-                            <img className='dice' id="9" src={this.state.dicePicObj[0]} onClick={() => {this.playerRemoveDice('9')}} value='0' />
+                            <img className='dice' id="7" src={this.state.dicePicObj[0]} onClick={() => {this.removeDice('7', 'computer')}} value='0' />
+                            <img className='dice' id="8" src={this.state.dicePicObj[0]} onClick={() => {this.removeDice('8', 'computer')}} value='0' />
+                            <img className='dice' id="9" src={this.state.dicePicObj[0]} onClick={() => {this.removeDice('9', 'computer')}} value='0' />
                         </div>
                     </div>
                 </div>
@@ -157,7 +329,6 @@ class Game extends Component {
                 </div>
                 <div id="game-page-buttons">
                     <Button id="roll-dice-button" className="buttons" bsSize="large" onClick={this.rollDice}>Roll Dice</Button>
-                    <Button className="buttons" bsSize="large" onClick={this.resetDice}>Reset</Button>
                 </div>
             </div>
         )
@@ -168,15 +339,36 @@ class Game extends Component {
 
 export default connect(
   (state) => {
-    return {};
+    return {
+        turn: state.turn,
+        rollNum: state.rollNum,
+        computerKeepArr: state.computerKeepArr,
+        diceRollArr: state.diceRollArr,
+        fire: state.fire
+    };
   }, 
   (dispatch) => {
       return {
           updatePlayerKeep: function(playerKeepArr) {
               dispatch(updatePlayerKeep(playerKeepArr));
           },
+          updateComputerKeep: function(computerKeepArr) {
+              dispatch(updateComputerKeep(computerKeepArr));
+          },
           updateDiceRoll: function(diceRollArr) {
               dispatch(updateDiceRoll(diceRollArr));
+          },
+          updateRollNum: function() {
+              dispatch(updateRollNum());
+          },
+          fireBool: function() {
+              dispatch(fireBool());
+          },
+          changeTurn: function(player) {
+              dispatch(changeTurn(player));
+          },
+          resetRollNum: function() {
+              dispatch(resetRollNum());
           }
       };
   }

@@ -4,112 +4,116 @@ var compBottomScore = 0;
 var compCount = 1;
 var options = ["1", "2", "3", "yahtzee", "lgstr", "4k", "smstr", "fullhouse", "3k", "4", "5", "6"];
 
+
 //ROLL
 // Returns an array of a certain number of randomly rolled die.
-function roll(numDice) {
-	var arr = [];
-	for (var i = 0; i < numDice; i++) {
-		var die = Math.ceil(Math.random() * 6);
-		arr.push(die);
+// function roll(numDice) {
+// 	var arr = [];
+// 	for (var i = 0; i < numDice; i++) {
+// 		var die = Math.ceil(Math.random() * 6);
+// 		arr.push(die);
+// 	}
+// 	var clone = arr.slice();
+// 	var string = clone.join(", ");
+// 	return arr;
+// }
+
+//CHECK FOR ACHIEVEMENTS
+// Returns true if an array of dice is a yahtzee.
+function isYahtzee(arr) {
+	for (var i = 0; i < 4; i++) {
+		if (arr[i] !== arr[i+1]) {
+			return false;
+		}
 	}
-	var clone = arr.slice();
-	var string = clone.join(", ");
-	return arr;
+	return true;
 }
 
-// //CHECK FOR ACHIEVEMENTS
-// // Returns true if an array of dice is a yahtzee.
-// function isYahtzee(arr) {
-// 	for (var i = 0; i < 4; i++) {
-// 		if (arr[i] !== arr[i+1]) {
-// 			return false;
-// 		}
-// 	}
-// 	return true;
-// }
+// Returns true if an array of dice is a large straight.
+function isLgStr(arr) {
+	arr = arr.sort();
+	for (var i = 0; i < 4; i++) {
+		if (arr[i+1] - arr[i] !== 1) {
+			return false;
+		}
+	}
+	return true;
+}
 
-// // Returns true if an array of dice is a large straight.
-// function isLgStr(arr) {
-// 	arr = arr.sort();
-// 	for (var i = 0; i < 4; i++) {
-// 		if (arr[i+1] - arr[i] !== 1) {
-// 			return false;
-// 		}
-// 	}
-// 	return true;
-// }
+// Returns true if an array of dice contains a small straight.
+function isSmStr(arr) {
+	if (isLgStr(arr) === true) { return true; }
+	var newArr = [];
+	arr = arr.sort();
+	var clone = arr.slice();
+	for (var i = 0; i < arr.length; i++) {
+		if (i === arr.indexOf(arr[i])) {
+			newArr.push(arr[i]);
+		}
+	}
+	if (newArr.length === 5) {
+		if (clone[1] - 2 === clone[0]) {
+			clone.shift();
+		} else if (clone[clone.length-1] - clone[clone.length-2] === 2) {
+			clone.pop();
+		} else {
+			return false;
+		}
+		for (var k = 0; k < clone.length-1; k++) {
+			if (clone[k+1] - clone[k] !== 1) {
+				return false;
+			}
+		}
+	} else if (newArr.length === 4) {
+		for (var j = 0; j < newArr.length-1; j++) {
+			if (newArr[j+1] - newArr[j] !== 1) {
+				return false;
+			}
+		}
+	} else {
+		return false;
+	}
+	return true;
+}
 
-// // Returns true if an array of dice contains a small straight.
-// function isSmStr(arr) {
-// 	if (isLgStr(arr) === true) { return true; }
-// 	var newArr = [];
-// 	arr = arr.sort();
-// 	var clone = arr.slice();
-// 	for (var i = 0; i < arr.length; i++) {
-// 		if (i === arr.indexOf(arr[i])) {
-// 			newArr.push(arr[i]);
-// 		}
-// 	}
-// 	if (newArr.length === 5) {
-// 		if (clone[1] - 2 === clone[0]) {
-// 			clone.shift();
-// 		} else if (clone[clone.length-1] - clone[clone.length-2] === 2) {
-// 			clone.pop();
-// 		} else {
-// 			return false;
-// 		}
-// 		for (var k = 0; k < clone.length-1; k++) {
-// 			if (clone[k+1] - clone[k] !== 1) {
-// 				return false;
-// 			}
-// 		}
-// 	} else if (newArr.length === 4) {
-// 		for (var j = 0; j < newArr.length-1; j++) {
-// 			if (newArr[j+1] - newArr[j] !== 1) {
-// 				return false;
-// 			}
-// 		}
-// 	} else {
-// 		return false;
-// 	}
-// 	return true;
-// }
+// Returns true if an array of dice is a full house.
+function isFullHouse(arr) {
+	let newArr = countDice(arr);
+	if (newArr.length === 2) {
+		if (newArr[0][0] === "2" || newArr[0][0] === "3") {
+			if (newArr[1][0] === "2" || newArr[1][0] === "3") {
+				return true;
+			}
+		}
+	} else {
+		return false;
+	}
+}
 
-// // Returns true if an array of dice is a full house.
-// function isFullHouse(arr) {
-// 	newArr = countDice(arr);
-// 	if (newArr.length === 2) {
-// 		if (newArr[0][0] === "2" || newArr[0][0] === "3") {
-// 			if (newArr[1][0] === "2" || newArr[1][0] === "3") {
-// 				return true;
-// 			}
-// 		}
-// 	} else {
-// 		return false;
-// 	}
-// }
+// Returns true if an array of dice is a four of a kind.
+function is4k(arr) {
+  if (isYahtzee(arr)) return true;
+	var newArr = countDice(arr);
+	for (var i = 0; i < newArr.length; i++) {
+		if (newArr[i][0] === "4") {
+			return true;
+		}
+	}
+	return false;
+}
 
-// // Returns true if an array of dice is a four of a kind.
-// function is4k(arr) {
-// 	var newArr = countDice(arr);
-// 	for (var i = 0; i < newArr.length; i++) {
-// 		if (newArr[i][0] === "4") {
-// 			return true;
-// 		}
-// 	}
-// 	return false;
-// }
-
-// // Returns true if an array of dice is three of a kind.
-// function is3k(arr) {
-// 	var newArr = countDice(arr);
-// 	for (var i = 0; i < newArr.length; i++) {
-// 		if (newArr[i][0] === "3") {
-// 			return true;
-// 		}
-// 	}
-// 	return false;	
-// }
+// Returns true if an array of dice is three of a kind.
+function is3k(arr) {
+  if (isYahtzee(arr)) return true;
+  if (is4k(arr)) return true;
+	var newArr = countDice(arr);
+	for (var i = 0; i < newArr.length; i++) {
+		if (newArr[i][0] === "3") {
+			return true;
+		}
+	}
+	return false;	
+}
 
 //ANALAYZE
 // Checks the compTypes array to see if the computer already has that category filled.
@@ -168,186 +172,220 @@ function noRepArr(arr) {
 }
 
 
+export const choose = (arr) => {
+  let score = 0;
+  let countedDice = countDice(arr);
+  let bonus = false;
+  let title;
 
-
-// REWRITE THESE
-// Takes an array and chooses the best option to take for a score. Is used on the last roll or when you get a bonus yahtzee. Returns nothing but adds to compTypes array and the score.  COULD BE OPTIMIZED
-function choose(arr) {
-  var score = sumArray(arr);
-  var counted = countDice(arr);
-  var item = "";
+  console.log('compTypes: ', compTypes);
+  
+  // Check for yahtzee. 
   if (isYahtzee(arr) === true) {
     if (alreadyHaveComp("yahtzee") === true) {
-      compBottomScore += 100;
+      bonus = true;
       console.log("Computer got a bonus yahtzee for 100 points.");
     } else if (alreadyHaveComp("yahtzee") === false) {
       compTypes.push("yahtzee");
-      compBottomScore += 50;
       console.log("Computer got yahtzee for 50 points.");
-      return;
+      return ['CYahtzee', 50, bonus];
     }
   }
   if (isLgStr(arr) === true) {
     if (alreadyHaveComp("lgstr") === false) {
       compTypes.push("lgstr");
-      compBottomScore += 40;
       console.log("Computer got a large straight for 40 points.");
-      return;
+      return ['CLarge-Straight', 40, bonus];
     }
-  }
-  if (isSmStr(arr) === true) {
-    if (alreadyHaveComp("smstr") === false) {
-      compTypes.push("smstr");
-      compBottomScore += 30;
-      console.log("Computer got a small straight for 30 points.");
-      return;
+  } else {
+    if (isSmStr(arr) === true) {
+      if (!alreadyHaveComp("smstr")) {
+        compTypes.push("smstr");
+        console.log("Computer got a small straight for 30 points.");
+        return ['CSmall-Straight', 30, bonus];
+      }
     }
   }
   if (isFullHouse(arr) === true) {
-    if (alreadyHaveComp("fullhouse") === false) {
+    console.log('its a full house in choose')
+    if (!alreadyHaveComp("fullhouse")) {
+      console.log('you do not have a full house')
       compTypes.push("fullhouse");
-      compBottomScore += 25;
       console.log("Computer got a full house for 25 points.");
-      return;
+      return ['CFull-House', 25, bonus];
     }
   }
-  if (is4k(arr) === true) {
-    if (Number(counted[0][0]) > 3) {
-      if (alreadyHaveComp(counted[0][2]) === false) {
-        compTypes.push(counted[0][2]);
-        score = Number(counted[0][0]) * Number(counted[0][2]);
-        compTopScore += score;
-        console.log("Computer got " + score + " points for " + counted[0][2] + "s.");
-        return;
-      }
-    }
-    if (alreadyHaveComp("4k") === false) {
-      compTypes.push("4k");
-      compBottomScore += score;
-      console.log("Computer got a four of a kind for " + score + " points.");
-      return;
-    }
-  }
-  if (is3k(arr) === true) {
-    if (Number(counted[0][2]) > 3) {
-      if (alreadyHaveComp(counted[0][2]) === false) {
-        compTypes.push(counted[0][2]);
-        score = Number(counted[0][0]) * Number(counted[0][2]);
-        compTopScore += score;
-        console.log("Computer got " + score + " points for " + counted[0][2] + "s.");
-        return;
-      }
-    }
-    if (alreadyHaveComp("3k") === false) {
-      compTypes.push("3k");
-      compBottomScore += score;
-      console.log("Computer got a three of a kind for " + score + " points.");
-      return;
-    }
-  }
-  // THIS COULD BE OPTIMIZED. Right now the function will choose whichever number has the highest repeats. But sometimes it's best to just take a one or zero as the score for ones than to take twelve as the score for sixes. 
-  for (var i = 0; i < counted.length; i++) {
-    item = counted[i]
-    if (alreadyHaveComp(item[2]) === false) {
-      if (item[2] < 3) {
-        if (alreadyHaveComp("chance") === false) {
-          score = sumArray(arr);
-          compTypes.push("chance");
-          compBottomScore += score;
-          console.log("Computer took a chance with " + score + " points.");
-          return;
+  if (is4k(arr) || is3k(arr)) {
+    let type;
+    if (is4k(arr) && !alreadyHaveComp('4k')) type = 4;
+    else type = 3;
+    let name = type + 'k';
+    let outcome;
+    let value = Number(countedDice[0][2]);
+    if (!alreadyHaveComp(name)) {
+      if (value > 3) {
+        console.log('value in 3k/4k: ', value)
+        if (!alreadyHaveComp(value.toString())) {
+          outcome = 'value';
         } else {
-          for (var m = i+1; m < counted.length; m++) {
-            if (counted[m][2] === "1") {
-              if (alreadyHaveComp("1") === false) {
-                score = 1 * Number(counted[m][0]);
-                compTypes.push("1");
-                compTopScore += score;
-                console.log("Computer took " + score + " points for 1s.");
-                return;
-              }
-            } else if (counted[m][2] === "2") {
-              if (alreadyHaveComp("2") === false) {
-                score = 2 * Number(counted[m][0]);
-                compTypes.push("2");
-                compTopScore += score;
-                console.log("Computer took " + score + " points for 2s.");
-                return;
-              }
-            } else if (counted[m][2] === "3") {
-              if (alreadyHaveComp("3") === false) {
-                score = 3 * Number(counted[m][0]);
-                compTypes.push("3");
-                compTopScore += score;
-                console.log("Computer took " + score + " points for 3s.");
-                return;
-              }
-            }
+          if (!alreadyHaveComp(name)) {
+            outcome = 'kind';
           }
         }
-      }
-      score = Number(item[0]) * Number(item[2])
-      compTypes.push(item[2]);
-      compTopScore += score;
-      console.log("Computer got " + score + " points for " + item[2] + "s.");
-      return;
-    } 
-  } 
-  // THIS COULD BE OPTIMIZED. Chance could be used at better times, instead of as a catch all. Could be used when there is no good option for the top area (i.e. instead of taking 6 points for 6).
-  if (alreadyHaveComp("chance") === false) {
-    score = sumArray(arr);
-    compTypes.push("chance");
-    compBottomScore += score;
-    console.log("Computer took a chance with " + score + " points.");
-    return;
-  }
-  for (var j = 0; j < options.length; j++) {
-    if (alreadyHaveComp(options[j]) === false) {
-      if (options[j] === "yahtzee") {
-        compTypes.push("0yahtzee");
       } else {
-        compTypes.push(options[j]);
+        if (!alreadyHaveComp(name)) {
+          outcome = 'kind';
+        }
       }
-      console.log("Computer took a zero for " + options[j]);
-      return;
+    } else {
+      if (!alreadyHaveComp(value.toString())) {
+        outcome = 'value';
+      }
+    }
+    if (outcome === 'value') {
+      let number = +countedDice[0][0];
+      let val = +countedDice[0][2];
+      score += (number * val);
+      title = changeToId('' + value);
+      compTypes.push(value.toString());
+      console.log("Computer got a " + value + " for " + score + " points.");
+      console.log('a:', value.toString())
+      return [title, score, bonus];
+    } else if (outcome === 'kind') {
+      score += sumArray(arr);
+      compTypes.push(name);
+      console.log("Computer got a " + name + " for " + score + " points.");
+      if (type === 4) {
+        return ['CFour-of-a-Kind', score, bonus];
+      } else if (type === 3) {
+        return ['CThree-of-a-Kind', score, bonus];
+      }
+    }
+  }
+  if (!alreadyHaveComp('chance') && sumArray(arr) > 20) {
+    score += sumArray(arr);
+    compTypes.push('chance');
+    console.log('Computer took a chance for ' + score + ' points.');
+    return ['CChance', score, bonus];
+  }
+  // Find best spot out of 1-3. Find how much you would get and compare it to the total you could get, then compare to each other.
+  let scores = {};
+  let index;
+  let combined = countedDice.join('/') + '/';;
+  let sum;
+  let mostPossible;
+  for (let i = 1; i < 4; i++) {
+    if (!alreadyHaveComp(i.toString())) {
+      index = combined.indexOf(i+ '/');
+      sum = Number(combined[index-2]) * i;
+      mostPossible = i * 6;
+      scores[i] = sum / mostPossible;
+    }
+  }
+  // loop through object, if the value is a number and it is bigger than the number you start with switch them. return value.
+  let ratio;
+  let category;
+  for (let key in scores) {
+    if (!ratio) {
+      ratio = scores[key];
+      category = key;
+    } 
+    if (!isNaN(scores[key])) {
+      if (scores[key] > ratio) {
+        ratio = scores[key];
+        category = key;
+      }
+    }
+  }
+  if (ratio) {
+    let indexTwo = combined.indexOf(category + '/');
+    let amount = combined[indexTwo-2];
+    score += amount * Number(category);
+    title = changeToId(category);
+    compTypes.push(category.toString());
+    console.log("Computer got a " + category + " for " + score + " points.");
+    return [title, score, bonus];
+  }
+  // Chance
+  if (!alreadyHaveComp('chance')) {
+    score += sumArray(arr);
+    compTypes.push('chance');
+    console.log('Computer took a chance for ' + score + ' points.');
+    return ['CChance', score, bonus];
+  }
+  const remaining = [1, 2, 3, 4, 5, 6, 'yahtzee', 'lgstr', '4k', 'smstr', '3k', 4, 5, 6];
+  for (let j = 0; j < remaining.length; j++) {
+    let x = remaining[j];
+    console.log('x: ', x)
+    if (j === 3 || j === 4 || j === 5) {
+      if (!alreadyHaveComp(x.toString())) {
+        let indexTwo = combined.indexOf(x + '/');
+        let amount = combined[indexTwo-2];
+        let thisScore = amount * Number(x);
+        if (thisScore) {
+          title = changeToId(x.toString());
+          console.log("Computer got a " + x + " for " + score + " points.");
+          return [title, score, bonus];
+        }
+      }
+    } else if (!alreadyHaveComp(x.toString())) {
+      title = changeToId(x.toString());
+      compTypes.push(x.toString());
+      console.log('Computer took a zero for ' + x);
+      return [title, 0, bonus];
     }
   }
 }
 
-// Takes an array and checks if the array fulfills yahtzee, large straight, small straight (if you already have a large), or a full house. If it doesn't it returns "none", otherwise it returns the category.
-function analyze(arr) {
-  if (isYahtzee(arr) === true) {
-    if (alreadyHaveComp("yahtzee") === false) {
-      compTypes.push("yahtzee");
-      compBottomScore += 50;
-      console.log("Computer got a yahtzee for 50 points.")
-      return;
-    } else {
-      choose(arr);
-      return "yahtzee";
-    }
+const changeToId = (name) => {
+  switch (name) {
+    case '1': 
+      return 'COne';
+    case '2':
+      return 'CTwo';
+    case '3':
+      return 'CThree';
+    case '4': 
+      return 'CFour';
+    case '5': 
+      return 'CFive';
+    case '6': 
+      return 'CSix';
+    case 'yahtzee':
+      return 'CYahtzee';
+    case 'lgstr':
+      return 'CLarge-Straight';
+    case 'fullhouse':
+      return 'CFull-House';
+    case 'smstr':
+      return 'CSmall-Straight';
+    case '4k':
+      return 'CFour-of-a-Kind';
+    case '3k':
+      return 'CThree-of-a-Kind';
+    default: 
+      return name;
   }
-  if (isLgStr(arr) === true) {
-    if (alreadyHaveComp("lgstr") === false) {
-      compTypes.push("lgstr");
-      compBottomScore += 40;
-      console.log("Computer got a large straight for 40 points.");
+}
+
+
+// Takes an array and checks if the array fulfills yahtzee, large straight, small straight (if you already have a large), or a full house. If it doesn't it returns "none", otherwise it returns the category.
+export const analyze = (arr) => {
+  if (isYahtzee(arr)) {
+    return "yahtzee";
+  }
+  if (isLgStr(arr)) {
+    if (!alreadyHaveComp("lgstr")) {
       return "lgstr";
     }
   }
-  if (isSmStr(arr) === true && alreadyHaveComp("lgstr") === true) {
-    if (alreadyHaveComp("smstr") === false) {
-      compTypes.push("smstr");
-      compBottomScore += 30;
-      console.log("Computer got a small straight for 30 points.");
+  if (isSmStr(arr) && alreadyHaveComp("lgstr")) {
+    if (!alreadyHaveComp("smstr")) {
       return "smstr";
     }
   }
-  if (isFullHouse(arr) === true) {
-    if (alreadyHaveComp("fullhouse") === false) {
-      compTypes.push("fullhouse");
-      compBottomScore += 25;
-      console.log("Computer got a full house for 25 points.");
+  if (isFullHouse(arr)) {
+    if (!alreadyHaveComp("fullhouse")) {
       return "fullhouse";
     }
   }
@@ -487,24 +525,96 @@ function forFullHouse(arr) {
   return final;
 }
 
-// Takes an array of dice and chooses which to keep and which to roll (i.e. finds the best course of action). Returns an array: [# to reroll, [dice to keep]]
-//COULD BE OPTIMIZED, take into account all compTypes, use better stategy
-function find(arr) {
-  var y = forYahtzee(arr);
-  var fh = forFullHouse(arr);  
-  var str = [];
-  if (alreadyHaveComp("lgstr") === false) {
-    str = forLgStr(arr);
-  } else {
-    str = forSmStr(arr);
+// // Takes an array of dice and chooses which to keep and which to roll (i.e. finds the best course of action). Returns an array: [# to reroll, [dice to keep]]
+// //COULD BE OPTIMIZED, take into account all compTypes, use better stategy
+// // Change so it doesn't return the first part of the array, just dice to keep.
+// export const find = (arr) => {
+//   var y = forYahtzee(arr);
+//   var fh = forFullHouse(arr); 
+//   var str = [];
+//   if (alreadyHaveComp("lgstr") === false) {
+//     str = forLgStr(arr);
+//   } else {
+//     str = forSmStr(arr);
+//   }
+//   if (fh[0] === 1 && fh[0] < y[0]) {
+//     return fh[1];
+//   } else if (str[0] === 1 && str[0] < y[0]) {
+//     return str[1];
+//   } else {
+//     return y[1];
+//   }
+// }
+
+export const find = (arr) => {
+  const sorted = noRepArr(arr.sort());
+  const countedDice = countDice(arr);
+  console.log('counted: ', countedDice);
+  const combined = countedDice.join('/') + '/';
+  console.log('combined: ', combined);
+  
+  // FIRST ROLL
+  // if you have a pair or more of 4-6
+  // start at 6 and loop to 4, is the i or 3k or 4k open?
+    // If so, go for that one
+  let threeOrFour = false;
+  let keepArr = [];
+  if (+combined[0] > 2 && +combined[2] > 3) {
+    if (!alreadyHaveComp('3k') || !alreadyHaveComp('4k')) {
+      threeOrFour = true
+    }
+    for (let i = 2; i < combined.length; i+=4) {
+      if (+combined[i] > 3) {
+        if (!alreadyHaveComp(combined[i]) || threeOrFour === true) {
+          for (let n = 0; n < +combined[i-2]; n++) {
+            keepArr.push(+combined[i]);
+          }
+          break;
+        }
+      }
+    }
+    console.log('keepArr: ', keepArr)
+    return keepArr;
   }
-  if (fh[0] === 1 && fh[0] < y[0]) {
-    return fh;
-  } else if (str[0] === 1 && str[0] < y[0]) {
-    return str;
-  } else {
-    return y;
+  // if you have 3 consecutive numbers
+    // if you don't have a large or small straight, go for that.  
+  let sequence = 1;
+  keepArr = [];
+  for (let j = 0; j < sorted.length; j++) {
+    if (sorted[j+1] - sorted[j] === 1) {
+      sequence++;
+    } else {
+      sequence = 1;
+    }
+    console.log('sequence: ', sequence)
+    console.log(sorted[j])
+    keepArr = [sorted[j-1]];
+    if (sequence === 3) {
+      for (let k = j-1; k < sorted.length; k++) {
+        if (sorted[k+1] - sorted[k] === 1) {
+          keepArr.push(sorted[k+1]);
+        } else {
+          break;
+        }
+      }
+      if (!alreadyHaveComp('smstr') || !alreadyHaveComp('lgstr')) {
+        console.log('keepArr: ', keepArr)
+        return keepArr;
+      }
+    }
   }
+  // take the number with the most that you dont have yet
+  keepArr = [];
+  for (let l = 2; l < combined.length; l+=4) {
+    if (!alreadyHaveComp(combined[l])) {
+      for (let m = 0; m < combined[l-2]; m++) {
+        keepArr.push(+combined[l]);
+      }
+      break;
+    }
+  }
+  console.log('keepArr: ', keepArr)
+  return keepArr;
 }
 
 
@@ -513,27 +623,28 @@ function find(arr) {
 
 
 // Completes one computer turn.
-function computer(numRoll, diceToKeepArr) {
-  var analysis;
-  var final;
-  var diceRoll = roll(numRoll);
-  if (numRoll < 5) {
-    for (var i = 0; i < diceToKeepArr.length; i++) {
-      diceRoll.push(diceToKeepArr[i]);
-    }
-  }
-  console.log("Computer rolled " + diceRoll + ".");
-  if (compCount === 3) {
-    return choose(diceRoll);
-  }
-  analysis = analyze(diceRoll);
-  if (analysis !== "none") {
-    return;
-  }
-  final = find(diceRoll);
-  compCount++;
-  computer(final[0], final[1]);
-}
+// function computer(numToRoll, keepArr, diceArr, rollNum) {
+//   var analysis;
+//   var final;
+// //   var diceRoll = roll(numToRoll);
+// //   if (numToRoll < 5) {
+// //     for (var i = 0; i < diceToKeepArr.length; i++) {
+// //       diceRoll.push(diceToKeepArr[i]);
+// //     }
+// //   }
+// //   if (rollNum === 3) {
+// //       return choose(keepArr.concat(diceArr));
+// //   }
+// //   console.log("Computer rolled " + diceRoll + ".");
+// //   if (compCount === 3) {
+// //     return choose(diceRoll);
+// //   }
+//   analysis = analyze(diceRoll);
+//   if (analysis !== "none") {
+//     return [true, analysis];
+//   }
+//   final = find(diceRoll);
+// }
 
 // Plays through a full 13 turns (one entire game) for the computer.
 function game() {
@@ -543,13 +654,13 @@ function game() {
   var finalScore = 0;
   for (var i = 0; i < 13; i++) {
     compCount = 1;
-    computer(5, []);
+    //computer(5, []);
   }
   if (compTopScore >= 63) {
     compTopScore += 35;
   }
   finalScore = compTopScore + compBottomScore;
-  console.log("Computer's final score is " + finalScore);
+  //console.log("Computer's final score is " + finalScore);
   return finalScore;
 }
 
@@ -579,7 +690,7 @@ function stats() {
   console.log("Lowest: " + diego[0]);
 }
 
-stats();
+
 
 
 
