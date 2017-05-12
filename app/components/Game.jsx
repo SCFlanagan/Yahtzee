@@ -17,6 +17,11 @@ class Game extends Component {
             computerTopScore: 0,
             computerBottomScore: 0,
             compTypes: [],
+            showModal: false,
+            modalText: '',
+            result: null,
+            computerTotal: null,
+            playerTotal: null,
             dicePicObj: {
                 0: 'http://colornames.facts.co/darkredcolorcode/darkredcolor.png', 
                 1: 'http://www.clipartkid.com/images/160/dice-1-clip-art-at-clker-com-vector-clip-art-online-royalty-free-GIXbjz-clipart.png', 
@@ -39,16 +44,26 @@ class Game extends Component {
         this.computerMoveDice = this.computerMoveDice.bind(this);
         this.computerMoveThree = this.computerMoveThree.bind(this);
         this.consoleLogValues = this.consoleLogValues.bind(this);
+        this.endGame = this.endGame.bind(this);
+        this.closeModal = this.closeModal.bind(this);
     }
 
     componentDidUpdate() {
+        let boolean;
         if (this.state.compTypes.length === 13) {
+            if (this.state.result) {
+                return;
+            }
             console.log('bottom: ', this.state.computerBottomScore)
             console.log('top: ', this.state.computerTopScore)
             let total = 0;
             if (this.state.computerTopScore >= 63) total += 35;
             total += this.state.computerBottomScore + this.state.computerTopScore;
             console.log('total: ', total);
+            console.log('player scores: ', this.props.playerScores)
+            console.log('comp types: ', this.state.compTypes)
+            // OPEN A MODAL HERE THAT WILL TELL YOU THE RESULTS OF THE GAME
+            this.endGame(total);
             return;
         }
         if (this.props.fire === true) {
@@ -69,12 +84,31 @@ class Game extends Component {
            setTimeout(this.resetTurn, 8000)
            setTimeout(() => {
                 this.props.changeTurn('player');
-           }, 10000)
+           }, 9000)
            setTimeout(() => {
                 const rollButton = document.getElementById('roll-dice-button');
                 rollButton.style.visibility = 'visible';
-           }, 11000);
+           }, 10000);
        }
+    }
+
+    endGame(compTotal) {
+        const scores = this.props.playerScores;
+        let total = scores['One'] + scores['Two'] + scores['Three'] + scores['Four'] +  scores['Five'] +  scores['Six'];
+        if (total >= 63) {
+            total += 35;
+        }
+        total += (scores['Three-of-a-Kind'] + scores['Four-of-a-Kind'] + scores['Full-House'] + scores['Small-Straight'] + scores['Large-Straight'] + scores['Yahtzee'] + scores['Chance']);
+        if (total > compTotal) {
+            console.log(`You Win! You have a score of ${total} and the computer has a ${compTotal}.`);
+            this.setState({result: 'Won', computerTotal: compTotal, playerTotal: total, showModal: true});
+        } else if (compTotal > total) {
+            console.log(`You Lose! You have a score of ${total} and the computer has a ${compTotal}.`);
+            this.setState({result: 'Lost', computerTotal: compTotal, playerTotal: total, showModal: true});
+        } else {
+            console.log(`You Tied! You both have a score of ${total}.`);
+            this.setState({result: 'Tied', computerTotal: compTotal, playerTotal: total, showModal: true});
+        }
     }
 
     rollDice() {
@@ -276,6 +310,7 @@ class Game extends Component {
         if (bool === true) {
             const diceArr = this.combineComputerDice();
             const choice = Strategy.choose(diceArr);
+            console.log('CHOICE!!!!!!!!!!!!!!!', choice)
             const elem = document.getElementById(choice[0]);
             elem.className = 'score-final';
             console.log('choice[0]:', choice[0]);
@@ -287,12 +322,17 @@ class Game extends Component {
             this.state.compTypes.push(choice[0]);
             const title = choice[0].split('-').join(' ');
             elem.innerHTML = title.slice(1) + ': ' + choice[1];
+            this.setState({ modalText: choice[3], showModal: true })
             return true;
         } else {
             const rollButton = document.getElementById('roll-dice-button');
             rollButton.style.visibility = 'visible';
             return false;
         }
+    }
+
+    closeModal() {
+        this.setState({ showModal: false });
     }
 
     render() {
@@ -330,6 +370,12 @@ class Game extends Component {
                 <div id="game-page-buttons">
                     <Button id="roll-dice-button" className="buttons" bsSize="large" onClick={this.rollDice}>Roll Dice</Button>
                 </div>
+                {this.state.showModal ? 
+                    <div id='modal'> 
+                        <h3>{this.state.modalText}</h3>
+                        <Button id='modal-button' onClick={this.closeModal}>Ok</Button>
+                    </div>
+                    : null}
             </div>
         )
     }
@@ -344,7 +390,8 @@ export default connect(
         rollNum: state.rollNum,
         computerKeepArr: state.computerKeepArr,
         diceRollArr: state.diceRollArr,
-        fire: state.fire
+        fire: state.fire,
+        playerScores: state.playerScores
     };
   }, 
   (dispatch) => {

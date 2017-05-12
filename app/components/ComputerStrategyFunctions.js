@@ -177,42 +177,41 @@ export const choose = (arr) => {
   let countedDice = countDice(arr);
   let bonus = false;
   let title;
+  let notification = '';
 
-  console.log('compTypes: ', compTypes);
+  console.log('compTypes in choose: ', compTypes);
   
   // Check for yahtzee. 
   if (isYahtzee(arr) === true) {
     if (alreadyHaveComp("yahtzee") === true) {
       bonus = true;
-      console.log("Computer got a bonus yahtzee for 100 points.");
+      notification += "Computer got a bonus yahtzee for 100 points. ";
     } else if (alreadyHaveComp("yahtzee") === false) {
       compTypes.push("yahtzee");
-      console.log("Computer got yahtzee for 50 points.");
-      return ['CYahtzee', 50, bonus];
+      notification += "Computer got yahtzee for 50 points.";
+      return ['CYahtzee', 50, bonus, notification];
     }
   }
   if (isLgStr(arr) === true) {
     if (alreadyHaveComp("lgstr") === false) {
       compTypes.push("lgstr");
-      console.log("Computer got a large straight for 40 points.");
-      return ['CLarge-Straight', 40, bonus];
+      notification += "Computer got a large straight for 40 points.";
+      return ['CLarge-Straight', 40, bonus, notification];
     }
   } else {
     if (isSmStr(arr) === true) {
       if (!alreadyHaveComp("smstr")) {
         compTypes.push("smstr");
-        console.log("Computer got a small straight for 30 points.");
-        return ['CSmall-Straight', 30, bonus];
+        notification += "Computer got a small straight for 30 points.";
+        return ['CSmall-Straight', 30, bonus, notification];
       }
     }
   }
   if (isFullHouse(arr) === true) {
-    console.log('its a full house in choose')
     if (!alreadyHaveComp("fullhouse")) {
-      console.log('you do not have a full house')
       compTypes.push("fullhouse");
-      console.log("Computer got a full house for 25 points.");
-      return ['CFull-House', 25, bonus];
+      notification += "Computer got a full house for 25 points.";
+      return ['CFull-House', 25, bonus, notification];
     }
   }
   if (is4k(arr) || is3k(arr)) {
@@ -224,7 +223,6 @@ export const choose = (arr) => {
     let value = Number(countedDice[0][2]);
     if (!alreadyHaveComp(name)) {
       if (value > 3) {
-        console.log('value in 3k/4k: ', value)
         if (!alreadyHaveComp(value.toString())) {
           outcome = 'value';
         } else {
@@ -248,25 +246,24 @@ export const choose = (arr) => {
       score += (number * val);
       title = changeToId('' + value);
       compTypes.push(value.toString());
-      console.log("Computer got a " + value + " for " + score + " points.");
-      console.log('a:', value.toString())
-      return [title, score, bonus];
+      notification += "Computer got a " + value + " for " + score + " points.";
+      return [title, score, bonus, notification];
     } else if (outcome === 'kind') {
       score += sumArray(arr);
       compTypes.push(name);
-      console.log("Computer got a " + name + " for " + score + " points.");
+      notification += "Computer got a " + name + " for " + score + " points.";
       if (type === 4) {
-        return ['CFour-of-a-Kind', score, bonus];
+        return ['CFour-of-a-Kind', score, bonus, notification];
       } else if (type === 3) {
-        return ['CThree-of-a-Kind', score, bonus];
+        return ['CThree-of-a-Kind', score, bonus, notification];
       }
     }
   }
   if (!alreadyHaveComp('chance') && sumArray(arr) > 20) {
     score += sumArray(arr);
     compTypes.push('chance');
-    console.log('Computer took a chance for ' + score + ' points.');
-    return ['CChance', score, bonus];
+    notification += 'Computer took a chance for ' + score + ' points.';
+    return ['CChance', score, bonus, notification];
   }
   // Find best spot out of 1-3. Find how much you would get and compare it to the total you could get, then compare to each other.
   let scores = {};
@@ -303,20 +300,19 @@ export const choose = (arr) => {
     score += amount * Number(category);
     title = changeToId(category);
     compTypes.push(category.toString());
-    console.log("Computer got a " + category + " for " + score + " points.");
-    return [title, score, bonus];
+    notification += "Computer got a " + category + " for " + score + " points.";
+    return [title, score, bonus, notification];
   }
   // Chance
   if (!alreadyHaveComp('chance')) {
     score += sumArray(arr);
     compTypes.push('chance');
-    console.log('Computer took a chance for ' + score + ' points.');
-    return ['CChance', score, bonus];
+    notification += 'Computer took a chance for ' + score + ' points.';
+    return ['CChance', score, bonus, notification];
   }
   const remaining = [1, 2, 3, 4, 5, 6, 'yahtzee', 'lgstr', '4k', 'smstr', '3k', 4, 5, 6];
   for (let j = 0; j < remaining.length; j++) {
     let x = remaining[j];
-    console.log('x: ', x)
     if (j === 3 || j === 4 || j === 5) {
       if (!alreadyHaveComp(x.toString())) {
         let indexTwo = combined.indexOf(x + '/');
@@ -324,15 +320,16 @@ export const choose = (arr) => {
         let thisScore = amount * Number(x);
         if (thisScore) {
           title = changeToId(x.toString());
-          console.log("Computer got a " + x + " for " + score + " points.");
-          return [title, score, bonus];
+          compTypes.push(x.toString());
+          notification += "Computer got a " + x + " for " + score + " points.";
+          return [title, score, bonus, notification];
         }
       }
     } else if (!alreadyHaveComp(x.toString())) {
       title = changeToId(x.toString());
       compTypes.push(x.toString());
-      console.log('Computer took a zero for ' + x);
-      return [title, 0, bonus];
+      notification += 'Computer took a zero for ' + x;
+      return [title, 0, bonus, notification];
     }
   }
 }

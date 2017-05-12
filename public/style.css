@@ -1,3 +1,8 @@
+#game-page {
+    background-color: black;
+    height: 100vh;
+}
+
 body {
     background-color: black;
 }
@@ -139,7 +144,7 @@ body {
     font-weight: bold;
 }
 
-.scores:hover {
+.player-scores:hover {
     color: #333;
     background-color: #fff;
     border-color: #ccc;
@@ -156,5 +161,28 @@ body {
     padding-top: .4vh;
     height: 4vh;
     cursor: default;
+    font-weight: bold;
+}
+
+
+#modal {
+    position: absolute;
+    height: 20vh;
+    width: 30%;
+    top: 40vh;
+    left: 35%;
+    z-index: 4;
+    background-color: black;
+    color: #fafbae;
+    border: 10px solid #fafbae;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+
+#modal-button {
+    background-color: #fafbae;
+    color: black;
+    border-color: black;
     font-weight: bold;
 }

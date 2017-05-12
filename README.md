@@ -112,16 +112,16 @@ Fix when to go for 3k/4k, when to choose which
 
 Recognizing large straights
 
-Computer adding doubles to 1-6 (adding when there's already a score)
-
 Computer not taking a 0 for 4k
-
-can't get last computer score
-
-Add modals telling you what the computer chose
 
 Add instructions modals at very beginning
 
 Add up the scores at the end and have a winner's screen
 
+Player can't choose a category when it's not player's turn 
 
+Players scores (bottom half) not working right, especially when you don't have the correct roll
+
+Computer took a 0 for 4 when it had 2 4s (shouldve gotten an 8)
+
+players scoring for 3k, 4k, and small straight (counts them even when you don't get them)

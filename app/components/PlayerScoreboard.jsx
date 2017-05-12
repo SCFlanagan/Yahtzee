@@ -43,45 +43,45 @@ class PlayerScoreboard extends Component {
         return (
             <div>
                 <div className="top-score scoreboard-buttons">
-                    <div id="One" className="scores" onClick={() => {
+                    <div id="One" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(1, 'One', this.combinePlayerDice));
                         }}>One</div>
-                    <div id="Two" className="scores" onClick={() => {
+                    <div id="Two" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(2, 'Two', this.combinePlayerDice));
                         }}>Two</div>
-                    <div id="Three" className="scores" onClick={() => {
+                    <div id="Three" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(3, 'Three', this.combinePlayerDice));
                         }}>Three</div>
-                    <div id="Four" className="scores" onClick={() => {
+                    <div id="Four" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(4, 'Four', this.combinePlayerDice));
                         }}>Four</div>
-                    <div id="Five" className="scores" onClick={() => {
+                    <div id="Five" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(5, 'Five', this.combinePlayerDice));
                         }}>Five</div>
-                    <div id="Six" className="scores" onClick={() => {
+                    <div id="Six" className="player-scores scores" onClick={() => {
                         this.addScoreChangeTurn(this.addOneThroughSix(6, 'Six', this.combinePlayerDice));
                         }}>Six</div>
                 </div>
                 <div className="bottom-score scoreboard-buttons">
-                    <div className="scores"id="Three-of-a-Kind" onClick={() => {
+                    <div className="player-scores scores"id="Three-of-a-Kind" onClick={() => {
                         this.addScoreChangeTurn(this.score3or4k('Three-of-a-Kind', 3, this.combinePlayerDice));
                         }}>Three of a Kind</div>
-                    <div className="scores"id="Four-of-a-Kind" onClick={() => {
+                    <div className="player-scores scores"id="Four-of-a-Kind" onClick={() => {
                         this.addScoreChangeTurn(this.score3or4k('Four-of-a-Kind', 4, this.combinePlayerDice));
                         }}>Four of a Kind</div>
-                    <div className="scores"id="Full-House" onClick={() => {
+                    <div className="player-scores scores"id="Full-House" onClick={() => {
                         this.addScoreChangeTurn(this.scoreFullHouse(this.combinePlayerDice));
                         }}>Full House</div>
-                    <div className="scores"id="Small-Straight" onClick={() => {
+                    <div className="player-scores scores"id="Small-Straight" onClick={() => {
                         this.addScoreChangeTurn(this.scoreSmStr(this.combinePlayerDice));
                         }}>Small Straight</div>
-                    <div className="scores"id="Large-Straight" onClick={() => {
+                    <div className="player-scores scores"id="Large-Straight" onClick={() => {
                         this.addScoreChangeTurn(this.scoreLgStr(this.combinePlayerDice));
                         }}>Large Straight</div>
-                    <div className="scores"id="Yahtzee" onClick={() => {
+                    <div className="player-scores scores"id="Yahtzee" onClick={() => {
                         this.addScoreChangeTurn(this.scoreYahtzee(this.combinePlayerDice));
                         }}>Yahtzee</div>
-                    <div className="scores"id="Chance" onClick={() => {
+                    <div className="player-scores scores"id="Chance" onClick={() => {
                         this.addScoreChangeTurn(this.scoreChance(this.combinePlayerDice));
                         }}>Chance</div>
                 </div>

@@ -59,33 +59,39 @@ export const score3or4k = (id, num, findAll) => {
     const score = sumArray(all);
     console.log('******score: ', score)
     const counted = countDice(all);
+    let success;
     if (Number(counted[0][0]) >= num) {
-        deButton(id, score);
-        console.log('******score: ', score)
-        return [id, score];
+        success = deButton(id, score);
+        if (success) return [id, score]
+        else return null;
     }
     // Make this a modal!!
     const title = id.split('-').join(' ');
-    deButton(id, 0);
-    return [id, score];
+    success = deButton(id, score);
+    if (success) return [id, score]
+    else return null;
 }
 
 export const scoreFullHouse = (findAll) => {
     const all = findAll();
     const newArr = countDice(all);
     let answer = true;
+    let success;
     if (!all.length) {
-        deButton('Full-House', 0);
-        return ['Full-House', 0];
+        success = deButton('Full-House', 0);
+        if (success) return ['Full-House', 0]
+        else return null;
     }
     if (newArr[0][0] === "2" || newArr[0][0] === "3" || newArr[0][0] === "5") {
         if (newArr[1][0] === "2" || newArr[1][0] === "3" || newArr[0][0] === "5") {
-            deButton('Full-House', 25);
-            return ['Full-House', 25];
+            success = deButton('Full-House', 25);
+            if (success) return ['Full-House', 25]
+            else return null;
         }
     }
-    deButton('Full-House', 0);
-    return ['Full-House', 0];
+    success = deButton('Full-House', 0);
+    if (success) return ['Full-House', 0]
+    else return null;
 }
 
 export const scoreSmStr = (findAll) => {
@@ -93,9 +99,11 @@ export const scoreSmStr = (findAll) => {
     let all = findAll();
     all = all.sort();
     let answer = true;
+    let success;
     if (scoreLgStr(findAll, true) === true) {
-        deButton('Small-Straight', 30);
-        return ['Small-Straight', 30];
+        success = deButton('Small-Straight', 30);
+        if (success) return ['Small-Straight', 30]
+        else return null;
     }
     let clone = all.slice();
     for (let i = 0; i < all.length; i++) {
@@ -126,11 +134,13 @@ export const scoreSmStr = (findAll) => {
         answer = false;
     }
     if (answer === false) {
-        deButton('Small-Straight', 0);
-        return ['Small-Straight', 0];
+        success = deButton('Small-Straight', 0);
+        if (success) return ['Small-Straight', 0]
+        else return null;
     } else {
-        deButton('Small-Straight', 30);
-        return ['Small-Straight', 30];
+        success = deButton('Small-Straight', 30);
+        if (success) return ['Small-Straight', 30]
+        else return null;
     }
 }
 
@@ -138,6 +148,7 @@ export const scoreLgStr = (findAll, calledWithSmStr) => {
     let all = findAll();
     all = all.sort();
     let score;
+    let success;
     for (var i = 0; i < 4; i++) {
         if (all[i+1] - all[i] !== 1) {
             score = 0;
@@ -147,32 +158,38 @@ export const scoreLgStr = (findAll, calledWithSmStr) => {
         return true;
     }
     if (score !== undefined) {
-        deButton('Large-Straight', 0);
-        return ['Large-Straight', 0];
+        success = deButton('Large-Straight', 0);
+        if (success) return ['Large-Straight', 0]
+        else return null;
     } else {
-        deButton('Large-Straight', 40);
-        return ['Large-Straight', 40];
+        success = deButton('Large-Straight', 40);
+        if (success) return ['Large-Straight', 40]
+        else return null;
     }
 }
 
 export const scoreYahtzee = (findAll) => {
     const all = findAll();
+    let success;
     for (var i = 0; i < 4; i++) {
         if (all[i] !== all[i+1]) {
-            deButton('Yahtzee', 0);
-            return ['Yahtzee', 0];
+            success = deButton('Yahtzee', 0);
+            if (success) return ['Yahtzee', 0]
+            else return null;
         }
     }
     // take into account if there already is a yahtzee!!
-    deButton('Yahtzee', 50);
-    return ['Yahtzee', 50];
+    success = deButton('Yahtzee', 50);
+    if (success) return ['Yahtzee', 50]
+    else return null;
 }
 
 export const scoreChance = (findAll) => {
     const all = findAll();
     const score = sumArray(all);
-    deButton('Chance', score);
-    return ['Chance', score];
+    const success = deButton('Chance', score);
+    if (success) return ['Chance', score]
+    else return null;
 }
 
 
